@@ -14,22 +14,14 @@ jobs:
     concurrency: "kmmbridgepublish-${{ github.repository }}"
     runs-on: macos-latest
     steps:
-      - name: Random ID for build branch
-        id: generate-uuid
-        uses: filipstefansson/uuid-action@v1
-      - uses: peterjgrainger/action-create-branch@v2.2.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          branch: "build-${{ steps.generate-uuid.outputs.uuid }}"
       - name: Checkout the repo
         uses: actions/checkout@v3
-        with:
-          ref: "build-${{ steps.generate-uuid.outputs.uuid }}"
+
       - uses: actions/setup-java@v2
         with:
           distribution: "adopt"
           java-version: "11"
+
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v1
       - name: Cache build tooling
@@ -47,18 +39,3 @@ jobs:
         uses: touchlab/git-auto-commit-action@v4
         with:
           commit_message: Update iOS Packaging
-      - name: Read version
-        id: version
-        uses: touchlab/read-file-action@v1
-        with:
-          path: "${{ inputs.KMM_MODULE_PATH }}/build/faktory/version"
-      - name: Create Release
-        uses: touchlab/release-action@v1.10.0
-        with:
-          commit: "build-${{ steps.generate-uuid.outputs.uuid }}"
-          tag: ${{ steps.version.outputs.content }}
-      - name: Delete branch
-        uses: touchlab/action-delete-branch@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branches: "build-${{ steps.generate-uuid.outputs.uuid }}"
