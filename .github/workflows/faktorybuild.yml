@@ -44,21 +44,21 @@ jobs:
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
       - name: Push Config Updates
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: touchlab/git-auto-commit-action@v4
         with:
           commit_message: Update iOS Packaging
       - name: Read version
         id: version
-        uses: juliangruber/read-file-action@v1
+        uses: touchlab/read-file-action@v1
         with:
           path: "${{ inputs.KMM_MODULE_PATH }}/build/faktory/version"
       - name: Create Release
-        uses: ncipollo/release-action@v1.10.0
+        uses: touchlab/release-action@v1.10.0
         with:
           commit: "build-${{ steps.generate-uuid.outputs.uuid }}"
           tag: ${{ steps.version.outputs.content }}
       - name: Delete branch
-        uses: dawidd6/action-delete-branch@v3
+        uses: touchlab/action-delete-branch@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branches: "build-${{ steps.generate-uuid.outputs.uuid }}"
