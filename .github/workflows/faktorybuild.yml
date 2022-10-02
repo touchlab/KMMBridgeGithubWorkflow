@@ -10,7 +10,8 @@ on:
         required: false
 
 jobs:
-  spmpublish:
+  kmmbridgepublish:
+    concurrency: "kmmbridgepublish-${{ github.repository }}"
     runs-on: macos-latest
     steps:
       - name: Random ID for build branch
