@@ -2,15 +2,10 @@ name: KMM Bridge Github Workflow
 on:
   workflow_call:
     inputs:
-      GITHUB_REPO:
-        type: string
-        required: true
       KMM_MODULE_PATH:
         type: string
         required: true
     secrets:
-      GITHUB_AUTH:
-        required: true
       gradle_params:
         required: false
 
@@ -25,7 +20,7 @@ jobs:
         run: echo "UUID is ${{ steps.generate-uuid.outputs.uuid }}"
       - uses: peterjgrainger/action-create-branch@v2.2.0
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_AUTH }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           branch: "build-${{ steps.generate-uuid.outputs.uuid }}"
       - name: Checkout the repo
@@ -46,7 +41,7 @@ jobs:
             ~/.konan
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
       - name: Build Main
-        run: ./gradlew publishRemoteFramework -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_AUTH }} -PGITHUB_REPO=${{ inputs.GITHUB_REPO }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
+        run: ./gradlew publishRemoteFramework -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
       - name: Push Config Updates
