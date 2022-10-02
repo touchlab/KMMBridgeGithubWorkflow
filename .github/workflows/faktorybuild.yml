@@ -13,6 +13,14 @@ jobs:
   spmpublish:
     runs-on: macos-latest
     steps:
+      - name: Random ID for build branch
+        id: generate-uuid
+        uses: filipstefansson/uuid-action@v1
+      - uses: peterjgrainger/action-create-branch@v2.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          branch: "build-${{ steps.generate-uuid.outputs.uuid }}"
       - name: Checkout the repo
         uses: actions/checkout@v3
         with:
@@ -34,20 +42,15 @@ jobs:
         run: ./gradlew publishRemoteFramework -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
+      - name: Push Config Updates
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update iOS Packaging
       - name: Read version
         id: version
         uses: juliangruber/read-file-action@v1
         with:
           path: "${{ inputs.KMM_MODULE_PATH }}/build/faktory/version"
-      - uses: peterjgrainger/action-create-branch@v2.2.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          branch: "build-${{ steps.version.outputs.content }}"
-      - name: Push Config Updates
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Update iOS Packaging
       - name: Create Release
         uses: ncipollo/release-action@v1.10.0
         with:
