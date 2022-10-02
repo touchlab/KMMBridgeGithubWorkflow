@@ -35,8 +35,6 @@ jobs:
         run: ./gradlew publishRemoteFramework -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
-      - name: Git push
-        run: git push origin --tags
 
 #      - name: Push Config Updates
 #        uses: touchlab/git-auto-commit-action@v4
