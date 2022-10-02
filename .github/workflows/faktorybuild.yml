@@ -1,0 +1,67 @@
+name: KMM Bridge Github Workflow
+on:
+  workflow_call:
+    inputs:
+      GITHUB_REPO:
+        type: string
+        required: true
+      KMM_MODULE_PATH:
+        type: string
+        required: true
+    secrets:
+      GITHUB_AUTH:
+        required: true
+      gradle_params:
+        required: false
+
+jobs:
+  spmpublish:
+    runs-on: macos-latest
+    steps:
+      - name: Set UUID
+        id: generate-uuid
+        uses: filipstefansson/uuid-action@v1
+      - name: Get the UUID
+        run: echo "UUID is ${{ steps.generate-uuid.outputs.uuid }}"
+      - uses: peterjgrainger/action-create-branch@v2.2.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_AUTH }}
+        with:
+          branch: "build-${{ steps.generate-uuid.outputs.uuid }}"
+      - name: Checkout the repo
+        uses: actions/checkout@v3
+        with:
+          ref: "build-${{ steps.generate-uuid.outputs.uuid }}"
+      - uses: actions/setup-java@v2
+        with:
+          distribution: "adopt"
+          java-version: "11"
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+      - name: Cache build tooling
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.konan
+          key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
+      - name: Build Main
+        run: ./gradlew publishRemoteFramework -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_AUTH }} -PGITHUB_REPO=${{ inputs.GITHUB_REPO }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
+        env:
+          GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
+      - name: Push Config Updates
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_message: Update iOS Packaging
+      - name: Read version
+        id: version
+        uses: juliangruber/read-file-action@v1
+        with:
+          path: "${{ inputs.KMM_MODULE_PATH }}/build/faktory/version"
+      - name: Echo version
+        run: echo "${{ steps.version.outputs.content }}"
+      - name: Create Release
+        uses: ncipollo/release-action@v1.10.0
+        with:
+          commit: "build-${{ steps.generate-uuid.outputs.uuid }}"
+          tag: ${{ steps.version.outputs.content }}
