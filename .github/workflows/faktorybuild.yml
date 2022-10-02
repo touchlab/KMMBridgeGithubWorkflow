@@ -17,6 +17,9 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
+      - name: Git push
+        run: git pull --tags
+
       - uses: actions/setup-java@v2
         with:
           distribution: "adopt"
