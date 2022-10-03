@@ -32,6 +32,12 @@ jobs:
             ~/.konan
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
 
+      - name: Apply SSH Key
+        if: ${{ secrets.PODSPEC_SSH_KEY != null }}
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.PODSPEC_SSH_KEY }}
+
       - name: Build Main
         run: ./gradlew publishRemoteFramework -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
