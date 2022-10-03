@@ -33,7 +33,7 @@ jobs:
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
 
       - name: Apply SSH Key
-        if: ${{ secrets.PODSPEC_SSH_KEY != null }}
+        if: secrets.PODSPEC_SSH_KEY != null
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.PODSPEC_SSH_KEY }}
