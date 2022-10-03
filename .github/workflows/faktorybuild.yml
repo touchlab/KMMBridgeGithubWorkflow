@@ -32,8 +32,11 @@ jobs:
             ~/.konan
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
 
+      - env:
+          PODSPEC_SSH_KEY: ${{ secrets.PODSPEC_SSH_KEY }}
+
       - name: Apply SSH Key
-        if: env.PODSPEC_SSH_KEY != null
+        if: ${{ env.PODSPEC_SSH_KEY != '' }}
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.PODSPEC_SSH_KEY }}
