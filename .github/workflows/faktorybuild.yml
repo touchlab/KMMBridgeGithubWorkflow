@@ -5,6 +5,9 @@ on:
       gradle_params:
         required: false
 
+env:
+  PODSPEC_SSH_KEY_EXISTS: ${{ secrets.PODSPEC_SSH_KEY != ''}}
+
 jobs:
   kmmbridgepublish:
     concurrency: "kmmbridgepublish-${{ github.repository }}"
@@ -15,6 +18,12 @@ jobs:
 
       - name: Git pull
         run: git pull --tags
+
+      - name: Apply SSH Key
+        if: ${{ env.PODSPEC_SSH_KEY_EXISTS }}
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.PODSPEC_SSH_KEY }}
 
       - uses: actions/setup-java@v2
         with:
@@ -31,14 +40,6 @@ jobs:
             ~/.gradle/caches
             ~/.konan
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
-
-      - name: Apply SSH Key
-        env:
-          PODSPEC_SSH_KEY: ${{ secrets.PODSPEC_SSH_KEY }}
-        if: ${{ env.PODSPEC_SSH_KEY != '' }}
-        uses: webfactory/ssh-agent@v0.5.4
-        with:
-          ssh-private-key: ${{ secrets.PODSPEC_SSH_KEY }}
 
       - name: Build Main
         run: ./gradlew publishRemoteFramework -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
