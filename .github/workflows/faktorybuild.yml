@@ -17,7 +17,7 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
-      - name: Git push
+      - name: Git pull
         run: git pull --tags
 
       - uses: actions/setup-java@v2
@@ -27,6 +27,7 @@ jobs:
 
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v1
+
       - name: Cache build tooling
         uses: actions/cache@v2
         with:
@@ -34,12 +35,8 @@ jobs:
             ~/.gradle/caches
             ~/.konan
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
+
       - name: Build Main
         run: ./gradlew publishRemoteFramework -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
-
-#      - name: Push Config Updates
-#        uses: touchlab/git-auto-commit-action@v4
-#        with:
-#          commit_message: Update iOS Packaging
