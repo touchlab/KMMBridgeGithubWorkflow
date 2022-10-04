@@ -18,9 +18,6 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
-      - name: Git pull
-        run: git pull --tags
-
       - name: Apply SSH Key
         if: ${{ env.PODSPEC_SSH_KEY_EXISTS }}
         uses: webfactory/ssh-agent@v0.5.4
