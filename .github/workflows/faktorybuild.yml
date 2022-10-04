@@ -6,10 +6,6 @@ on:
         required: false
       PODSPEC_SSH_KEY:
         required: false
-      github_username:
-        required: false
-      github_password:
-        required: false
 
 env:
   PODSPEC_SSH_KEY_EXISTS: ${{ secrets.PODSPEC_SSH_KEY != ''}}
@@ -34,7 +30,7 @@ jobs:
       - uses: extractions/netrc@v1
         with:
           machine: api.github.com
-          username: "Yolo"
+          username: "cirunner"
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-java@v2
