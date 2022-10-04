@@ -34,8 +34,8 @@ jobs:
       - uses: extractions/netrc@v1
         with:
           machine: api.github.com
-          username: ${{ secrets.github_username }}
-          password: ${{ secrets.github_password }}
+          username: "Yolo"
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-java@v2
         with:
