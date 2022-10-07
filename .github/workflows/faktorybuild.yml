@@ -18,9 +18,6 @@ jobs:
       - name: Checkout the repo
         uses: actions/checkout@v3
 
-      - name: Echo PODSPEC_SSH_KEY_EXISTS
-        run: echo "$PODSPEC_SSH_KEY_EXISTS"
-
       - name: Apply SSH Key
         if: ${{ env.PODSPEC_SSH_KEY_EXISTS == 'true' }}
         uses: webfactory/ssh-agent@v0.5.4
