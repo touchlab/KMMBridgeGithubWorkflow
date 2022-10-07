@@ -22,7 +22,7 @@ jobs:
         run: echo "$PODSPEC_SSH_KEY_EXISTS"
 
       - name: Apply SSH Key
-        if: ${{ $PODSPEC_SSH_KEY_EXISTS }}
+        if: ${{ env.PODSPEC_SSH_KEY_EXISTS == 'true' }}
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.PODSPEC_SSH_KEY }}
