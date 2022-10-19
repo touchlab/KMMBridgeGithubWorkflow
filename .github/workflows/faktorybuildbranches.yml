@@ -19,7 +19,7 @@ env:
 jobs:
   kmmbridgepublish:
     concurrency: "kmmbridgepublish-${{ github.repository }}"
-    runs-on: macos-latest
+    runs-on: macos-12
     steps:
       - name: Random ID for build branch
         id: generate-uuid
