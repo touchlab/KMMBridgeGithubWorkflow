@@ -76,6 +76,7 @@ jobs:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
 
       - name: Delete branch
+        if: always()
         uses: touchlab/action-delete-branch@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
