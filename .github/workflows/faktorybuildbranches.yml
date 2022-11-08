@@ -7,11 +7,26 @@ on:
         default: 'kmmBridgePublish'
         required: false
         type: string
+      netrcMachine:
+        description: 'Netrc machine param'
+        default: 'maven.pkg.github.com'
+        required: false
+        type: string
     secrets:
       gradle_params:
         required: false
       PODSPEC_SSH_KEY:
         required: false
+      netrcUsername:
+        description: 'Netrc username param'
+        default: 'cirunner'
+        required: false
+        type: string
+      netrcPassword:
+        description: 'Netrc password param'
+        default: ${{ secrets.PODSPEC_SSH_KEY }}
+        required: false
+        type: string
 
 env:
   PODSPEC_SSH_KEY_EXISTS: ${{ secrets.PODSPEC_SSH_KEY != ''}}
@@ -44,15 +59,9 @@ jobs:
 
       - uses: extractions/netrc@v1
         with:
-          machine: api.github.com
-          username: "cirunner"
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - uses: extractions/netrc@v1
-        with:
-          machine: maven.pkg.github.com
-          username: "cirunner"
-          password: ${{ secrets.GITHUB_TOKEN }}
+          machine: ${{ secrets.netrcMachine }}
+          username: ${{ secrets.netrcUsername }}
+          password: ${{ secrets.netrcPassword }}
 
       - uses: actions/setup-java@v2
         with:
