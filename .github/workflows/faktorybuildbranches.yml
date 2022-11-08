@@ -56,8 +56,8 @@ jobs:
       - uses: extractions/netrc@v1
         with:
           machine: ${{ secrets.netrcMachine }}
-          username: ${{ secrets.netrcUsername != '' && secrets.netrcUsername || 'cirunner' }}
-          password: ${{ secrets.netrcPassword != '' && secrets.netrcPassword || secrets.GITHUB_TOKEN  }}
+          username: ${{ 'cirunner' }}
+          password: ${{ secrets.GITHUB_TOKEN  }}
 
       - uses: actions/setup-java@v2
         with:
