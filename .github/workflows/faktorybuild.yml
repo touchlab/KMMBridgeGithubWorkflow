@@ -19,14 +19,10 @@ on:
         required: false
       netrcUsername:
         description: 'Netrc username param'
-        default: 'cirunner'
         required: false
-        type: string
       netrcPassword:
         description: 'Netrc password param'
-        default: ${{ secrets.PODSPEC_SSH_KEY }}
         required: false
-        type: string
 
 env:
   PODSPEC_SSH_KEY_EXISTS: ${{ secrets.PODSPEC_SSH_KEY != ''}}
@@ -48,8 +44,8 @@ jobs:
       - uses: extractions/netrc@v1
         with:
           machine: ${{ secrets.netrcMachine }}
-          username: ${{ secrets.netrcUsername }}
-          password: ${{ secrets.netrcPassword }}
+          username: ${{ secrets.netrcUsername != '' && secrets.netrcUsername || 'cirunner' }}
+          password: ${{ secrets.netrcPassword != '' && secrets.netrcPassword || secrets.GITHUB_TOKEN  }}
 
       - uses: actions/setup-java@v2
         with:
