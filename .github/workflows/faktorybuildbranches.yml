@@ -55,7 +55,7 @@ jobs:
 
       - uses: extractions/netrc@v1
         with:
-          machine: ${{ secrets.netrcMachine }}
+          machine: ${{ 'maven.pkg.github.com' }}
           username: ${{ 'cirunner' }}
           password: ${{ secrets.GITHUB_TOKEN  }}
 
