@@ -47,6 +47,9 @@ jobs:
         with:
           ref: "build-${{ steps.generate-uuid.outputs.uuid }}"
 
+      - name: git remote show origin
+        run: git remote show origin
+
       - name: Apply SSH Key
         if: ${{ env.PODSPEC_SSH_KEY_EXISTS == 'true' }}
         uses: webfactory/ssh-agent@v0.5.4
