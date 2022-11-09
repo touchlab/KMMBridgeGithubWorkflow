@@ -55,9 +55,9 @@ jobs:
 
       - uses: extractions/netrc@v1
         with:
-          machine: ${{ 'maven.pkg.github.com' }}
-          username: ${{ 'cirunner' }}
-          password: ${{ secrets.GITHUB_TOKEN  }}
+          machine: maven.pkg.github.com
+          username: "cirunner"
+          password: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-java@v2
         with:
