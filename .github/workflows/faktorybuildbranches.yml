@@ -50,11 +50,17 @@ jobs:
       - name: git remote show origin
         run: git remote show origin
 
+      - name: git pull before
+        run: git pull
+
       - name: Apply SSH Key
         if: ${{ env.PODSPEC_SSH_KEY_EXISTS == 'true' }}
         uses: webfactory/ssh-agent@v0.5.4
         with:
           ssh-private-key: ${{ secrets.PODSPEC_SSH_KEY }}
+
+      - name: git pull after
+        run: git pull
 
       - uses: extractions/netrc@v1
         with:
