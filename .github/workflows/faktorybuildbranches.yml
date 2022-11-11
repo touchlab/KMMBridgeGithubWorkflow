@@ -55,7 +55,7 @@ jobs:
 
       - uses: extractions/netrc@v1
         with:
-          machine: ${{ secrets.netrcMachine }}
+          machine: ${{ inputs.netrcMachine }}
           username: ${{ secrets.netrcUsername != '' && secrets.netrcUsername || 'cirunner' }}
           password: ${{ secrets.netrcPassword != '' && secrets.netrcPassword || secrets.GITHUB_TOKEN  }}
 
