@@ -2,6 +2,10 @@ name: KMM Bridge Github Workflow
 on:
   workflow_call:
     inputs:
+      module: 
+        description: The module name to run the task on if you have mutliple kmp modules
+        required: false
+        type: string
       publishTask:
         description: 'The publish task to call if not kmmBridgePublish'
         default: 'kmmBridgePublish'
@@ -75,6 +79,9 @@ jobs:
             ~/.konan
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
 
+      - name: get module
+        run: echo ${{ inputs.module != '' && inputs.module || "default" }}
+        
       - name: Build Main
         run: ./gradlew ${{ inputs.publishTask }} -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
