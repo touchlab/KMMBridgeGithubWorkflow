@@ -37,7 +37,7 @@ jobs:
     runs-on: macos-12
     steps:
       - name: get module
-        run: echo ${{ inputs.module != '' && inputs.module + || 'default' }}
+        run: echo ${{ inputs.module != '' && format('{0}:',inputs.module) || 'default' }}
             
       - name: Random ID for build branch
         id: generate-uuid
