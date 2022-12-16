@@ -30,7 +30,7 @@ on:
 
 env:
   PODSPEC_SSH_KEY_EXISTS: ${{ secrets.PODSPEC_SSH_KEY != ''}}
-  MODULE: ${{ inputs.module != '' && format('{0}:',inputs.module) || 'default' }}
+  MODULE: ${{ inputs.module != '' && format('{0}:',inputs.module) || '' }}
 
 jobs:
   kmmbridgepublish:
