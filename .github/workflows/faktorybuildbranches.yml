@@ -36,6 +36,9 @@ jobs:
     concurrency: "kmmbridgepublish-${{ github.repository }}"
     runs-on: macos-12
     steps:
+      - name: get module
+        run: echo ${{ inputs.module != '' && inputs.module + || 'default' }}
+            
       - name: Random ID for build branch
         id: generate-uuid
         uses: filipstefansson/uuid-action@v1
@@ -79,9 +82,6 @@ jobs:
             ~/.konan
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
 
-      - name: get module
-        run: echo ${{ inputs.module != '' && inputs.module || 'default' }}
-        
       - name: Build Main
         run: ./gradlew ${{ inputs.publishTask }} -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
