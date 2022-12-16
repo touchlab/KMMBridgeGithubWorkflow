@@ -30,15 +30,13 @@ on:
 
 env:
   PODSPEC_SSH_KEY_EXISTS: ${{ secrets.PODSPEC_SSH_KEY != ''}}
+  MODULE: ${{ inputs.module != '' && format('{0}:',inputs.module) || 'default' }}
 
 jobs:
   kmmbridgepublish:
     concurrency: "kmmbridgepublish-${{ github.repository }}"
     runs-on: macos-12
     steps:
-      - name: get module
-        run: echo ${{ inputs.module != '' && format('{0}:',inputs.module) || 'default' }}
-            
       - name: Random ID for build branch
         id: generate-uuid
         uses: filipstefansson/uuid-action@v1
@@ -83,7 +81,7 @@ jobs:
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
 
       - name: Build Main
-        run: ./gradlew ${{ inputs.publishTask }} -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
+        run: ./gradlew ${{ env.MODULE }}${{ inputs.publishTask }} -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
 
