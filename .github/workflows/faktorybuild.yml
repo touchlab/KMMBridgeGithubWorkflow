@@ -2,6 +2,10 @@ name: KMM Bridge Github Workflow
 on:
   workflow_call:
     inputs:
+      module:
+        description: The module name to run the task on if you have mutliple kmp modules
+        required: false
+        type: string
       publishTask:
         description: 'The publish task to call if not kmmBridgePublish'
         default: 'kmmBridgePublish'
@@ -10,6 +14,16 @@ on:
       netrcMachine:
         description: 'Netrc machine param'
         default: 'maven.pkg.github.com'
+        required: false
+        type: string
+      jvmVersion:
+        description: 'JVM Version to use. Will be passed to java-version parameter of setup-java'
+        default: '11'
+        required: false
+        type: string
+      runsOn:
+        description: 'Host parameter to pass to runs-on'
+        default: 'macos-12'
         required: false
         type: string
     secrets:
@@ -32,7 +46,7 @@ env:
 jobs:
   kmmbridgepublish:
     concurrency: "kmmbridgepublish-${{ github.repository }}"
-    runs-on: macos-12
+    runs-on: ${{ inputs.runsOn }}
     steps:
       - name: Checkout the repo
         uses: actions/checkout@v3
@@ -52,7 +66,7 @@ jobs:
       - uses: actions/setup-java@v2
         with:
           distribution: "adopt"
-          java-version: "11"
+          java-version: ${{ inputs.jvmVersion }}
 
       - name: Validate Gradle Wrapper
         uses: gradle/wrapper-validation-action@v1
@@ -66,6 +80,6 @@ jobs:
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
 
       - name: Build Main
-        run: ./gradlew ${{ env.MODULE }}${{ inputs.publishTask }} -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
+        run: ./gradlew ${{ env.MODULE }}${{ inputs.publishTask }} -PENABLE_PUBLISHING=true -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:MaxPermSize=2048m -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
