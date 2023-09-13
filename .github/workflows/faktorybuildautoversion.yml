@@ -60,7 +60,6 @@ jobs:
         with:
           fetch-depth: 0
           fetch-tags: true
-          ref: "build-${{ steps.generate-uuid.outputs.uuid }}"
 
       - uses: touchlab/read-property@main
         id: versionBasePropertyValue
