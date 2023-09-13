@@ -124,7 +124,7 @@ jobs:
         id: autoversion-remove
         with:
           versionBase: ${{ steps.versionBasePropertyValue.outputs.propVal }}
-          removeTempPublish: 'true'
+          finalizeBuildVersion: steps.autoversion.outputs.nextVersion
 
       - name: Delete branch
         if: (!inputs.retainBuildBranch) && (!cancelled())
