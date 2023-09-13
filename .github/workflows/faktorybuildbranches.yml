@@ -131,6 +131,14 @@ jobs:
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
 
+      - name: Remove marker version tags
+        uses: touchlab/autoversion@main
+        if: inputs.versionBaseProperty != ''
+        id: autoversion-remove
+        with:
+          versionBase: ${{ steps.versionBasePropertyValue.outputs.propVal }}
+          removeTempPublish: 'true'
+
       - name: Delete branch
         if: always()
         uses: touchlab/action-delete-branch@v3
