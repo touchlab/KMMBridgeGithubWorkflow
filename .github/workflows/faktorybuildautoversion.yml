@@ -75,6 +75,7 @@ jobs:
         id: autoversion
         with:
           versionBase: ${{ steps.versionBasePropertyValue.outputs.propVal }}
+          createBuildBranch: "true"
 
       - name: Print Next Version
         id: outputversion
