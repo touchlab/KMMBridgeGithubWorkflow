@@ -61,7 +61,7 @@ jobs:
           fetch-depth: 0
           fetch-tags: true
 
-      - uses: touchlab/read-property@main
+      - uses: touchlab/read-property@0.1
         id: versionBasePropertyValue
         with:
           file: ./gradle.properties
@@ -71,7 +71,7 @@ jobs:
         id: output
         run: echo "${{ steps.versionBasePropertyValue.outputs.propVal }}"
 
-      - uses: touchlab/autoversion@main
+      - uses: touchlab/autoversion@0.1
         id: autoversion
         with:
           versionBase: ${{ steps.versionBasePropertyValue.outputs.propVal }}
