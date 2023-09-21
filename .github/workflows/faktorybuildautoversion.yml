@@ -71,15 +71,24 @@ jobs:
         id: output
         run: echo "${{ steps.versionBasePropertyValue.outputs.propVal }}"
 
-      - uses: touchlab/autoversion@0.1
+      - uses: touchlab/autoversion-nextversion@main
         id: autoversion
         with:
           versionBase: ${{ steps.versionBasePropertyValue.outputs.propVal }}
-          createBuildBranch: "true"
 
       - name: Print Next Version
         id: outputversion
         run: echo "${{ steps.autoversion.outputs.nextVersion }}"
+
+      - uses: touchlab/autoversion-tagmarker@main
+        id: autoversion-tagmarker
+        with:
+          nextVersion: ${{ steps.autoversion.outputs.nextVersion }}
+
+      - uses: touchlab/autoversion-buildbranch@main
+        id: autoversion-buildbranch
+        with:
+          buildBranch: "build-${{ steps.autoversion.outputs.nextVersion }}"
 
       - name: Apply SSH Key
         if: ${{ env.PODSPEC_SSH_KEY_EXISTS == 'true' }}
@@ -114,12 +123,19 @@ jobs:
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
 
-      - name: Remove marker version tags
-        uses: touchlab/autoversion@main
-        id: autoversion-remove
+      - uses: touchlab/autoversion-finishrelease@main
+        id: autoversion-finishrelease
         with:
-          versionBase: ${{ steps.versionBasePropertyValue.outputs.propVal }}
-          finalizeBuildVersion: ${{ steps.autoversion.outputs.nextVersion }}
+          commitMessage: "KMM SPM package release for ${{ steps.autoversion.outputs.nextVersion }}"
+          tagMessage: "KMM release version ${{ steps.autoversion.outputs.nextVersion }}"
+          tagVersion: ${{ steps.autoversion.outputs.nextVersion }}
+          branchName: "build-${{ steps.autoversion.outputs.nextVersion }}"
+
+      - uses: touchlab/autoversion-tagmarker@main
+        id: autoversion-tagmarker-cleanup
+        with:
+          nextVersion: ${{ steps.autoversion.outputs.nextVersion }}
+          cleanupMarkers: 'true'
 
       - name: Delete branch
         if: (!inputs.retainBuildBranch) && (!cancelled())
