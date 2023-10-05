@@ -30,6 +30,11 @@ on:
         description: 'Base version key from gradle.properties'
         required: true
         type: string
+      groupBaseProperty:
+        description: 'Base group key from gradle.properties'
+        default: GROUP
+        required: false
+        type: string
       retainBuildBranch:
         description: 'Keep the build branch after build complete'
         default: false
@@ -70,6 +75,25 @@ jobs:
       - name: Print versionBasePropertyValue
         id: output
         run: echo "${{ steps.versionBasePropertyValue.outputs.propVal }}"
+
+      - uses: touchlab/read-property@0.1
+        id: groupBasePropertyValue
+        with:
+          file: ./gradle.properties
+          property: ${{ inputs.groupBaseProperty }}
+
+      - name: Is Touchlab group name
+        run: echo "is_touchlab_group=${{ contains(steps.groupBasePropertyValue.outputs.propVal, 'co.touchlab') }}" >> $GITHUB_ENV
+
+      - name: Check org name if Touchlab group
+        if: env.is_touchlab_group == 'true'
+        run: echo "is_touchlab_org=${{ contains(github.repository, 'touchlab/') }}" >> $GITHUB_ENV
+
+      - name: Fail if it's not a TL org
+        if: env.is_touchlab_org == 'false'
+        run: |
+          echo "::error file=gradle.properties::Make sure to change GROUP name"
+          core.setFailed()
 
       - uses: touchlab/autoversion-nextversion@main
         id: autoversion
