@@ -26,6 +26,14 @@ on:
         default: 'macos-12'
         required: false
         type: string
+      versionBaseProperty:
+        description: 'Base version key from gradle.properties'
+        required: true
+        type: string
+      retainBuildBranch:
+        description: 'Keep the build branch after build complete'
+        default: false
+        type: boolean
     secrets:
       gradle_params:
         required: false
@@ -47,20 +55,43 @@ jobs:
     concurrency: "kmmbridgepublish-${{ github.repository }}"
     runs-on: ${{ inputs.runsOn }}
     steps:
-      - name: Random ID for build branch
-        id: generate-uuid
-        uses: filipstefansson/uuid-action@v1
-
-      - uses: peterjgrainger/action-create-branch@v2.2.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Checkout the repo with tags
+        uses: actions/checkout@v4
         with:
-          branch: "build-${{ steps.generate-uuid.outputs.uuid }}"
+          fetch-depth: 0
+          fetch-tags: true
 
-      - name: Checkout the repo
-        uses: actions/checkout@v3
+      - uses: touchlab/read-property@0.1
+        id: versionBasePropertyValue
         with:
-          ref: "build-${{ steps.generate-uuid.outputs.uuid }}"
+          file: ./gradle.properties
+          property: ${{ inputs.versionBaseProperty }}
+
+      - name: Print versionBasePropertyValue
+        id: output
+        run: echo "${{ steps.versionBasePropertyValue.outputs.propVal }}"
+
+      - name: Touchlab Sample Sanity Check (Ignore this for your CI)
+        uses: touchlab/sample-group-sanity-check@0.1
+
+      - uses: touchlab/autoversion-nextversion@main
+        id: autoversion
+        with:
+          versionBase: ${{ steps.versionBasePropertyValue.outputs.propVal }}
+
+      - name: Print Next Version
+        id: outputversion
+        run: echo "${{ steps.autoversion.outputs.nextVersion }}"
+
+      - uses: touchlab/autoversion-tagmarker@main
+        id: autoversion-tagmarker
+        with:
+          nextVersion: ${{ steps.autoversion.outputs.nextVersion }}
+
+      - uses: touchlab/autoversion-buildbranch@main
+        id: autoversion-buildbranch
+        with:
+          buildBranch: "build-${{ steps.autoversion.outputs.nextVersion }}"
 
       - name: Apply SSH Key
         if: ${{ env.PODSPEC_SSH_KEY_EXISTS == 'true' }}
@@ -91,13 +122,27 @@ jobs:
           key: ${{ runner.os }}-v4-${{ hashFiles('*.gradle.kts') }}
 
       - name: Build Main
-        run: ./gradlew ${{ env.MODULE }}${{ inputs.publishTask }} -PENABLE_PUBLISHING=true -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
+        run: ./gradlew ${{ env.MODULE }}${{ inputs.publishTask }} -PAUTO_VERSION=${{ steps.autoversion.outputs.nextVersion }} -PENABLE_PUBLISHING=true -PGITHUB_PUBLISH_TOKEN=${{ secrets.GITHUB_TOKEN }} -PGITHUB_REPO=${{ github.repository }} ${{ secrets.gradle_params }} --no-daemon --stacktrace
         env:
           GRADLE_OPTS: -Dkotlin.incremental=false -Dorg.gradle.jvmargs="-Xmx3g -XX:+HeapDumpOnOutOfMemoryError -Dfile.encoding=UTF-8 -XX:MaxMetaspaceSize=512m"
 
+      - uses: touchlab/autoversion-finishrelease@main
+        id: autoversion-finishrelease
+        with:
+          commitMessage: "KMM SPM package release for ${{ steps.autoversion.outputs.nextVersion }}"
+          tagMessage: "KMM release version ${{ steps.autoversion.outputs.nextVersion }}"
+          tagVersion: ${{ steps.autoversion.outputs.nextVersion }}
+          branchName: "build-${{ steps.autoversion.outputs.nextVersion }}"
+
+      - uses: touchlab/autoversion-tagmarker@main
+        id: autoversion-tagmarker-cleanup
+        with:
+          nextVersion: ${{ steps.autoversion.outputs.nextVersion }}
+          cleanupMarkers: 'true'
+
       - name: Delete branch
-        if: always()
+        if: (!inputs.retainBuildBranch) && (!cancelled())
         uses: touchlab/action-delete-branch@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          branches: "build-${{ steps.generate-uuid.outputs.uuid }}"
+          branches: "build-${{ steps.autoversion.outputs.nextVersion }}"
