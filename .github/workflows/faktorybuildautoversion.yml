@@ -72,7 +72,7 @@ jobs:
         run: echo "${{ steps.versionBasePropertyValue.outputs.propVal }}"
 
       - name: Touchlab Sample Sanity Check (Ignore this for your CI)
-        uses: touchlab/sample-group-sanity-check@0.1
+        uses: touchlab/sample-group-sanity-check@main
 
       - uses: touchlab/autoversion-nextversion@main
         id: autoversion
