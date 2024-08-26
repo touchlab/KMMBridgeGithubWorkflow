@@ -23,7 +23,7 @@ on:
         type: string
       runsOn:
         description: 'Host parameter to pass to runs-on'
-        default: 'macos-12'
+        default: 'macos-latest'
         required: false
         type: string
       versionBaseProperty:
